@@ -38,8 +38,8 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
 
 # Clear cache and optimize
+RUN php artisan optimize:clear
 RUN php artisan config:cache && php artisan view:cache
-RUN php artisan optimize
 RUN php artisan storage:link
 
 
