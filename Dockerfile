@@ -1,54 +1,47 @@
+# ─────────────── Stage 1: Node builder ───────────────
+FROM node:18 AS node_builder
+
+WORKDIR /app
+
+# Copy only package files, install deps, build assets
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build    # builds Tailwind & Livewire assets into public/build
+
+# ─────────────── Stage 2: PHP runtime ───────────────
 FROM php:8.2-fpm
 
-# Install system dependencies
+# Install PHP extensions & system tools
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    git \
-    curl \
-    npm \
-    nodejs \
-    libzip-dev \
-    libpq-dev \
-    libcurl4-openssl-dev \
-    libssl-dev
+    git curl zip unzip libpng-dev libonig-dev libxml2-dev \
+  && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
-
-# ✅ Install Composer from official image
+# Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www
 
-# Copy project files
+# Copy your application code
 COPY . .
 
-# Install PHP dependencies
+# Copy built assets from node_builder
+COPY --from=node_builder /app/public/build ./public/build
+
+# Install PHP deps
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node dependencies and build assets
-RUN npm install && npm run build
+# Permissions & storage link
+RUN chmod -R 775 storage bootstrap/cache \
+ && php artisan storage:link
 
-# Clear cache and optimize
-RUN php artisan optimize:clear
-RUN php artisan config:cache && php artisan view:cache
-RUN php artisan storage:link
+# Cache everything
+RUN php artisan config:cache \
+ && php artisan route:cache \
+ && php artisan view:cache
 
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www && chmod -R 755 /var/www
-
-# Expose app port
+# Expose port & serve
 EXPOSE 8000
-
-# Start Laravel server
-# CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
-CMD php artisan config:cache && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
+CMD ["php","artisan","serve","--host=0.0.0.0","--port=8000"]
