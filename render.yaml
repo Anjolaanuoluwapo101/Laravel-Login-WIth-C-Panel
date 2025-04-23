@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: laravel-vite-app
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: Laravel
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://laravel-login-with-c-panel.onrender.com
+      - key: LOG_CHANNEL
+        value: debug
+      - key: LOG_LEVEL
+        value: debug
+      - key: DB_CONNECTION
+        value: sqlite
+      # - key: DB_HOST
+      #   value: your-db-host
+      # - key: DB_PORT
+      #   value: 3306
+      # - key: DB_DATABASE
+      #   value: your-db-name
+      # - key: DB_USERNAME
+      #   value: your-db-user
+      # - key: DB_PASSWORD
+      #   value: your-db-password
