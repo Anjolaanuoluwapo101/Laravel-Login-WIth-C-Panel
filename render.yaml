@@ -13,7 +13,8 @@ services:
       - key: APP_ENV
         value: production
       - key: APP_KEY
-        generateValue: true
+        value: base64:T/W1QR2yW5eXlpPYE3xBkgN7uv26jEj7gBSzUVXGHzU=
+        # generateValue: true
       - key: APP_DEBUG
         value: false
       - key: APP_URL
@@ -24,6 +25,8 @@ services:
         value: debug
       - key: DB_CONNECTION
         value: sqlite
+      - key: SESSION_DRIVER
+        value: file
       # - key: DB_HOST
       #   value: your-db-host
       # - key: DB_PORT
