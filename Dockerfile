@@ -2,14 +2,6 @@
 FROM node:18 AS node_builder
 
 WORKDIR /app
-
-# Copy only package files, install deps, build assets
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-RUN npm run build    # builds Tailwind & Livewire assets into public/build
-
 # ─────────────── Stage 2: PHP runtime ───────────────
 FROM php:8.2-fpm
 
@@ -37,9 +29,6 @@ WORKDIR /var/www
 
 # Copy your application code
 COPY . .
-
-# Copy built assets from node_builder
-COPY --from=node_builder /app/public/build ./public/build
 
 # Install PHP deps
 RUN composer install --no-dev --optimize-autoloader
