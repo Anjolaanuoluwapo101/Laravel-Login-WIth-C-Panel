@@ -1,8 +1,3 @@
-# ─────────────── Stage 1: Node builder ───────────────
-FROM node:18 AS node_builder
-
-WORKDIR /app
-# ─────────────── Stage 2: PHP runtime ───────────────
 FROM php:8.2-fpm
 
 # Install PHP extensions & system tools
@@ -37,11 +32,15 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chmod -R 775 storage bootstrap/cache \
  && php artisan storage:link
 
+# Fix permissions for built assets
+RUN chown -R www-data:www-data public/build \
+ && chmod -R 755 public/build
+
 # Cache everything
 # RUN php artisan config:cache \
 #  && php artisan view:cache 
 
 # Expose port & serve
 EXPOSE 8000
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
+CMD php artisan optimize:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
 # CMD ["php","artisan","serve","--host=0.0.0.0","--port=8000"]
