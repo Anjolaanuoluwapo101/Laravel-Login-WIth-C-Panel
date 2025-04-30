@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'is_admin',
     ];
 
     /**
@@ -62,6 +63,24 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the initials of the user from their name.
+     *
+     * @return string
+     */
+    public function initials(): string
+    {
+        $words = explode(' ', $this->name);
+        $initials = '';
+
+        foreach ($words as $word) {
+            $initials .= strtoupper(substr($word, 0, 1));
+        }
+
+        return $initials;
     }
 }
