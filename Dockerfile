@@ -28,6 +28,7 @@ COPY . .
 # Install PHP deps
 RUN composer install --no-dev --optimize-autoloader
 
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 # Permissions & storage link
 RUN chmod -R 775 storage bootstrap/cache \
  && php artisan storage:link
